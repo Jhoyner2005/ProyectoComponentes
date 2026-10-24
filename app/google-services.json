@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "668522790359",
+    "project_id": "gymud-abca1",
+    "storage_bucket": "gymud-abca1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:668522790359:android:5cf74875a18a96eff51f92",
+        "android_client_info": {
+          "package_name": "com.example.gymud"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhP7C2Kg6e8akLg1bQ6Nbo7dT-ATyOZn8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
