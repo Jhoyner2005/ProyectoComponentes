@@ -8,8 +8,8 @@ data class User(
     val name: String = "",
     val email: String = "",
     val role: String = "USER",
-    @get:PropertyName("membershipActive")
-    val isMembershipActive: Boolean = false,
+    @get:PropertyName("membershipActive") @set:PropertyName("membershipActive") @field:PropertyName("membershipActive")
+    var isMembershipActive: Boolean = false,
     val membershipEndDate: Timestamp? = null,
     val lastPaymentAmount: Double = 0.0
 )
