@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,6 +26,8 @@ import com.example.gymud.viewmodel.AdminViewModel
 @Composable
 fun UserManagementScreen(adminViewModel: AdminViewModel) {
     var searchQuery by remember { mutableStateOf("") }
+    var selectedFilterIndex by remember { mutableIntStateOf(0) }
+
     val users by adminViewModel.users.collectAsState()
     val message by adminViewModel.message.collectAsState()
     val context = LocalContext.current
@@ -36,13 +39,32 @@ fun UserManagementScreen(adminViewModel: AdminViewModel) {
         }
     }
 
-    val filteredUsers = users.filter {
-        it.name.contains(searchQuery, ignoreCase = true) ||
-                it.email.contains(searchQuery, ignoreCase = true)
+    // Conteos para los filtros
+    val totalCount = users.size
+    val clientsCount = users.count { it.role == "USER" }
+    val activeClientsCount = users.count { it.role == "USER" && it.isMembershipActive }
+    val inactiveClientsCount = users.count { it.role == "USER" && !it.isMembershipActive }
+    val trainersCount = users.count { it.role == "TRAINER" }
+    val adminsCount = users.count { it.role == "ADMIN" }
+
+    val filteredUsers = users.filter { user ->
+        val matchesSearch = user.name.contains(searchQuery, ignoreCase = true) ||
+                user.email.contains(searchQuery, ignoreCase = true)
+
+        val matchesFilter = when (selectedFilterIndex) {
+            1 -> user.role == "USER"
+            2 -> user.role == "USER" && user.isMembershipActive
+            3 -> user.role == "USER" && !user.isMembershipActive
+            4 -> user.role == "TRAINER"
+            5 -> user.role == "ADMIN"
+            else -> true
+        }
+
+        matchesSearch && matchesFilter
     }
 
     Column(modifier = Modifier.fillMaxSize().background(GymudDark).padding(20.dp)) {
-        ScreenTitle("Gestión de Miembros", "Administrar roles y membresías")
+        ScreenTitle("Gestión de Miembros", "Administrar roles y estado de membresías")
 
         OutlinedTextField(
             value = searchQuery,
@@ -50,7 +72,7 @@ fun UserManagementScreen(adminViewModel: AdminViewModel) {
             placeholder = { Text("Buscar por nombre o correo...", color = Color.Gray) },
             leadingIcon = { Icon(Icons.Default.Search, tint = GymudYellow, contentDescription = null) },
             shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = GymudSurface,
                 focusedContainerColor = GymudSurface,
@@ -60,11 +82,44 @@ fun UserManagementScreen(adminViewModel: AdminViewModel) {
             )
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        // Chips de Clasificación y Filtrado por Rol y Membresía
+        LazyRow(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val filters = listOf(
+                "Todos ($totalCount)",
+                "Clientes ($clientsCount)",
+                "Activos ($activeClientsCount)",
+                "Inactivos ($inactiveClientsCount)",
+                "Entrenadores ($trainersCount)",
+                "Admins ($adminsCount)"
+            )
+
+            items(filters.size) { index ->
+                FilterChip(
+                    selected = selectedFilterIndex == index,
+                    onClick = { selectedFilterIndex = index },
+                    label = { Text(filters[index], fontWeight = FontWeight.Bold, fontSize = 12.sp) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = when (index) {
+                            2 -> Color(0xFF2E7D32) // Verde Activos
+                            3 -> Color(0xFFC62828) // Rojo Inactivos
+                            4 -> Color(0xFF1E88E5) // Azul Entrenadores
+                            5 -> Color(0xFFE53935) // Rojo Admins
+                            else -> GymudYellow
+                        },
+                        selectedLabelColor = if (index == 0 || index == 1) Color.Black else Color.White,
+                        containerColor = GymudSurface,
+                        labelColor = Color.Gray
+                    )
+                )
+            }
+        }
 
         if (filteredUsers.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No se encontraron usuarios", color = Color.Gray)
+                Text("No se encontraron usuarios en esta categoría", color = Color.Gray)
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -175,7 +230,7 @@ fun UserCardItem(
                     // Estado de Membresía
                     Text(
                         text = if (user.isMembershipActive) "Membresía: ACTIVA" else "Membresía: INACTIVA",
-                        color = if (user.isMembershipActive) Color.Green else Color.Red,
+                        color = if (user.isMembershipActive) Color(0xFF66BB6A) else Color(0xFFEF5350),
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp
                     )
