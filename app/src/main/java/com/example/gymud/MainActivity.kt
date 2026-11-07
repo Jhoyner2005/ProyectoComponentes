@@ -18,6 +18,7 @@ import com.example.gymud.screens.admin.*
 import com.example.gymud.screens.auth.*
 import com.example.gymud.screens.trainer.*
 import com.example.gymud.screens.user.*
+import com.example.gymud.viewmodel.AdminViewModel
 import com.example.gymud.viewmodel.AuthState
 import com.example.gymud.viewmodel.AuthViewModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -61,6 +62,11 @@ class MainActivity : ComponentActivity() {
                                         authViewModel.resetState()
                                     }
                             }
+                            is AuthState.PasswordResetSent -> {
+                                Toast.makeText(context, "Se envió un enlace a tu correo para restablecer la contraseña.", Toast.LENGTH_LONG).show()
+                                authViewModel.resetState()
+                                navController.popBackStack()
+                            }
                             is AuthState.Error -> {
                                 Toast.makeText(context, (authState as AuthState.Error).message, Toast.LENGTH_LONG).show()
                                 authViewModel.resetState()
@@ -69,21 +75,31 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
+                    val isLoading = authState is AuthState.Loading
+
                     NavHost(navController = navController, startDestination = "login") {
                         composable("login") {
                             LoginScreen(
                                 onLoginClick = { e, p -> authViewModel.login(e, p) },
                                 onNavigateToRegister = { navController.navigate("register") },
-                                onNavigateToForgotPassword = { navController.navigate("forgot_password") }
+                                onNavigateToForgotPassword = { navController.navigate("forgot_password") },
+                                isLoading = isLoading
                             )
                         }
                         composable("register") {
                             RegisterScreen(
                                 onRegisterClick = { n, e, p -> authViewModel.register(n, e, p) },
-                                onNavigateToLogin = { navController.popBackStack() }
+                                onNavigateToLogin = { navController.popBackStack() },
+                                isLoading = isLoading
                             )
                         }
-                        composable("forgot_password") { ForgotPasswordScreen { navController.popBackStack() } }
+                        composable("forgot_password") {
+                            ForgotPasswordScreen(
+                                onSendResetClick = { email -> authViewModel.resetPassword(email) },
+                                onNavigateBack = { navController.popBackStack() },
+                                isLoading = isLoading
+                            )
+                        }
 
                         // --- USER ---
                         composable("user_home") {
@@ -112,13 +128,21 @@ class MainActivity : ComponentActivity() {
 
                         // --- ADMIN ---
                         composable("admin_home") {
+                            val adminViewModel: AdminViewModel = viewModel()
                             AdminDashboardScreen(
                                 onNavigateToUsers = { navController.navigate("admin_users") },
-                                onNavigateToInventory = { navController.navigate("admin_inventory") }
+                                onNavigateToInventory = { navController.navigate("admin_inventory") },
+                                adminViewModel = adminViewModel
                             )
                         }
-                        composable("admin_users") { UserManagementScreen() }
-                        composable("admin_inventory") { InventoryScreen() }
+                        composable("admin_users") {
+                            val adminViewModel: AdminViewModel = viewModel()
+                            UserManagementScreen(adminViewModel = adminViewModel)
+                        }
+                        composable("admin_inventory") {
+                            val adminViewModel: AdminViewModel = viewModel()
+                            InventoryScreen(adminViewModel = adminViewModel)
+                        }
                     }
                 }
             }

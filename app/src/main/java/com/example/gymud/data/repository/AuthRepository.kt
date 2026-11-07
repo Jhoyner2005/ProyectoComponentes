@@ -41,4 +41,27 @@ class AuthRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun resetPassword(email: String): Result<Unit> {
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getUserProfile(uid: String): Result<User> {
+        return try {
+            val doc = firestore.collection("users").document(uid).get().await()
+            val user = doc.toObject(User::class.java)
+            if (user != null) {
+                Result.success(user)
+            } else {
+                Result.failure(Exception("Usuario no encontrado en la base de datos"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

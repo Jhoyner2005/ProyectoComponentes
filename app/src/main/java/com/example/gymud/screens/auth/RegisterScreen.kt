@@ -19,7 +19,8 @@ import com.example.gymud.screens.common.*
 @Composable
 fun RegisterScreen(
     onRegisterClick: (String, String, String) -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    isLoading: Boolean = false
 ) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -56,6 +57,7 @@ fun RegisterScreen(
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                 singleLine = true,
+                enabled = !isLoading,
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = GymudSurface,
                     focusedContainerColor = GymudSurface,
@@ -73,6 +75,7 @@ fun RegisterScreen(
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                 singleLine = true,
+                enabled = !isLoading,
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = GymudSurface,
                     focusedContainerColor = GymudSurface,
@@ -91,6 +94,7 @@ fun RegisterScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
                 singleLine = true,
+                enabled = !isLoading,
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = GymudSurface,
                     focusedContainerColor = GymudSurface,
@@ -103,6 +107,7 @@ fun RegisterScreen(
 
             Button(
                 onClick = { onRegisterClick(name, email, password) },
+                enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
@@ -112,13 +117,21 @@ fun RegisterScreen(
                     contentColor = Color.Black
                 )
             ) {
-                Text("REGISTRARSE", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.Black,
+                        strokeWidth = 2.5.dp
+                    )
+                } else {
+                    Text("REGISTRARSE", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        TextButton(onClick = onNavigateToLogin) {
+        TextButton(onClick = onNavigateToLogin, enabled = !isLoading) {
             Text("¿Ya tienes cuenta? Inicia sesión", fontWeight = FontWeight.Medium, color = GymudYellow)
         }
     }

@@ -11,6 +11,7 @@ sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
     data class Success(val uid: String) : AuthState()
+    object PasswordResetSent : AuthState()
     data class Error(val message: String) : AuthState()
 }
 
@@ -48,6 +49,22 @@ class AuthViewModel : ViewModel() {
             repository.register(name, email, password).fold(
                 onSuccess = { uid -> _authState.value = AuthState.Success(uid) },
                 onFailure = { error -> _authState.value = AuthState.Error(error.localizedMessage ?: "Error al registrar la cuenta") }
+            )
+        }
+    }
+
+    fun resetPassword(email: String) {
+        if (email.isBlank()) {
+            _authState.value = AuthState.Error("Ingresa tu correo electrónico")
+            return
+        }
+
+        _authState.value = AuthState.Loading
+
+        viewModelScope.launch {
+            repository.resetPassword(email).fold(
+                onSuccess = { _authState.value = AuthState.PasswordResetSent },
+                onFailure = { error -> _authState.value = AuthState.Error(error.localizedMessage ?: "Error al enviar correo de recuperación") }
             )
         }
     }

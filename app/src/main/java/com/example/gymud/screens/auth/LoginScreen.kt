@@ -18,7 +18,8 @@ import com.example.gymud.screens.common.*
 fun LoginScreen(
     onLoginClick: (String, String) -> Unit,
     onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit
+    onNavigateToForgotPassword: () -> Unit,
+    isLoading: Boolean = false
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -53,6 +54,7 @@ fun LoginScreen(
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                 singleLine = true,
+                enabled = !isLoading,
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = GymudSurface,
                     focusedContainerColor = GymudSurface,
@@ -71,6 +73,7 @@ fun LoginScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
                 singleLine = true,
+                enabled = !isLoading,
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = GymudSurface,
                     focusedContainerColor = GymudSurface,
@@ -83,6 +86,7 @@ fun LoginScreen(
 
             Button(
                 onClick = { onLoginClick(email, password) },
+                enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
@@ -92,17 +96,25 @@ fun LoginScreen(
                     contentColor = Color.Black
                 )
             ) {
-                Text("INICIAR SESIÓN", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.Black,
+                        strokeWidth = 2.5.dp
+                    )
+                } else {
+                    Text("INICIAR SESIÓN", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        TextButton(onClick = onNavigateToForgotPassword) {
+        TextButton(onClick = onNavigateToForgotPassword, enabled = !isLoading) {
             Text("¿Olvidaste tu contraseña?", fontWeight = FontWeight.Medium, color = GymudYellow)
         }
 
-        TextButton(onClick = onNavigateToRegister) {
+        TextButton(onClick = onNavigateToRegister, enabled = !isLoading) {
             Text("¿No tienes cuenta? Regístrate aquí", fontWeight = FontWeight.Medium, color = GymudYellow)
         }
     }
