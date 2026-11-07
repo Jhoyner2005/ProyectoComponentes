@@ -18,11 +18,15 @@ val GymudSurface = Color(0xFF1E1E1E)
 val GymudYellow = Color(0xFFFFC107)
 
 @Composable
-fun GlassCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+fun GlassCard(
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = Color.White.copy(alpha = 0.05f),
+    content: @Composable ColumnScope.() -> Unit
+) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.05f))
+            .background(backgroundColor)
             .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {

@@ -72,13 +72,17 @@ class AdminViewModel : ViewModel() {
         }
     }
 
-    fun toggleInventoryStatus(itemId: String, currentIsDamaged: Boolean) {
+    fun reportInventoryDamage(itemId: String, isDamaged: Boolean, reportDetail: String) {
         viewModelScope.launch {
-            repository.toggleInventoryStatus(itemId, !currentIsDamaged).fold(
-                onSuccess = { _message.value = if (!currentIsDamaged) "Equipo reportado como Dañado" else "Equipo reparado y Operativo" },
-                onFailure = { _message.value = "Error al cambiar estado: ${it.localizedMessage}" }
+            repository.reportInventoryDamage(itemId, isDamaged, reportDetail).fold(
+                onSuccess = { _message.value = if (isDamaged) "Reporte de daño registrado" else "Equipo marcado como Operativo" },
+                onFailure = { _message.value = "Error al actualizar reporte: ${it.localizedMessage}" }
             )
         }
+    }
+
+    fun toggleInventoryStatus(itemId: String, currentIsDamaged: Boolean) {
+        reportInventoryDamage(itemId, !currentIsDamaged, "")
     }
 
     fun clearMessage() {

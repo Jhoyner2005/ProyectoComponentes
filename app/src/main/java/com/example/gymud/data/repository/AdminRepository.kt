@@ -3,6 +3,7 @@ package com.example.gymud.data.repository
 import com.example.gymud.data.model.Inventory
 import com.example.gymud.data.model.User
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -80,7 +81,8 @@ class AdminRepository {
                 id = docRef.id,
                 name = name,
                 category = category,
-                isDamaged = false
+                isDamaged = false,
+                reportDetail = ""
             )
             docRef.set(newItem).await()
             Result.success(Unit)
@@ -89,15 +91,25 @@ class AdminRepository {
         }
     }
 
-    // Cambiar estado de equipo (Dañado / Operativo)
-    suspend fun toggleInventoryStatus(itemId: String, isDamaged: Boolean): Result<Unit> {
+    // Cambiar estado de equipo (Dañado / Operativo) con reporte detallado
+    suspend fun reportInventoryDamage(itemId: String, isDamaged: Boolean, reportDetail: String = ""): Result<Unit> {
         return try {
             firestore.collection("inventory").document(itemId)
-                .update("isDamaged", isDamaged)
+                .set(
+                    mapOf(
+                        "isDamaged" to isDamaged,
+                        "reportDetail" to reportDetail
+                    ),
+                    SetOptions.merge()
+                )
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    suspend fun toggleInventoryStatus(itemId: String, isDamaged: Boolean): Result<Unit> {
+        return reportInventoryDamage(itemId, isDamaged, "")
     }
 }
