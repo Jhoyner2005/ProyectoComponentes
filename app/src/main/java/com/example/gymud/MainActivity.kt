@@ -21,6 +21,7 @@ import com.example.gymud.screens.user.*
 import com.example.gymud.viewmodel.AdminViewModel
 import com.example.gymud.viewmodel.AuthState
 import com.example.gymud.viewmodel.AuthViewModel
+import com.example.gymud.viewmodel.ProgressViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : ComponentActivity() {
@@ -112,7 +113,10 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("user_routine") { UserRoutineScreen() }
-                        composable("user_progress") { ProgressScreen() }
+                        composable("user_progress") {
+                            val progressViewModel: ProgressViewModel = viewModel()
+                            ProgressScreen(progressViewModel = progressViewModel)
+                        }
                         composable("user_membership") { MembershipScreen() }
 
                         // --- TRAINER ---
