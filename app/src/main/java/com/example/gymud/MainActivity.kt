@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.gymud.data.model.User
 import com.example.gymud.screens.admin.*
 import com.example.gymud.screens.auth.*
 import com.example.gymud.screens.trainer.*
@@ -45,10 +46,20 @@ class MainActivity : ComponentActivity() {
                         mutableStateOf("Usuario")
                     }
 
+                    var currentUserId by remember {
+                        mutableStateOf("")
+                    }
+
+                    var selectedTrainer by remember {
+                        mutableStateOf<User?>(null)
+                    }
+
                     LaunchedEffect(authState) {
                         when (authState) {
                             is AuthState.Success -> {
                                 val uid = (authState as AuthState.Success).uid
+
+                                currentUserId = uid
 
                                 FirebaseFirestore.getInstance()
                                     .collection("users")
@@ -90,7 +101,7 @@ class MainActivity : ComponentActivity() {
                             is AuthState.PasswordResetSent -> {
                                 Toast.makeText(
                                     context,
-                                    "Se envió un enlace a tu correo para restablecer la contraseña.",
+                                    "A password reset link was sent to your email address.",
                                     Toast.LENGTH_LONG
                                 ).show()
 
@@ -173,10 +184,13 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("user_membership")
                                 },
                                 onNavigateToChat = {
-                                    navController.navigate("chat_screen")
+                                    navController.navigate("trainer_list")
                                 },
                                 onLogout = {
                                     authViewModel.logout()
+
+                                    currentUserId = ""
+                                    selectedTrainer = null
 
                                     navController.navigate("login") {
                                         popUpTo("login") {
@@ -194,13 +208,25 @@ class MainActivity : ComponentActivity() {
 
                         composable("user_progress") {
                             val progressViewModel: ProgressViewModel = viewModel()
+
                             ProgressScreen(
+                                userId = currentUserId,
                                 progressViewModel = progressViewModel
                             )
                         }
 
                         composable("user_membership") {
                             MembershipScreen()
+                        }
+
+                        // TRAINER DIRECTORY
+                        composable("trainer_list") {
+                            TrainerListScreen(
+                                onTrainerSelected = { trainer ->
+                                    selectedTrainer = trainer
+                                    navController.navigate("chat_screen")
+                                }
+                            )
                         }
 
                         // TRAINER
@@ -221,7 +247,14 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("chat_screen") {
-                            ChatScreen()
+                            ChatScreen(
+                                userId = currentUserId,
+                                otherUserId = selectedTrainer?.uid ?: "",
+                                otherUserName = selectedTrainer?.name ?: "Messages",
+                                onBack = {
+                                    navController.popBackStack()
+                                }
+                            )
                         }
 
                         // ADMIN
@@ -241,6 +274,7 @@ class MainActivity : ComponentActivity() {
 
                         composable("admin_users") {
                             val adminViewModel: AdminViewModel = viewModel()
+
                             UserManagementScreen(
                                 adminViewModel = adminViewModel
                             )
@@ -248,6 +282,7 @@ class MainActivity : ComponentActivity() {
 
                         composable("admin_inventory") {
                             val adminViewModel: AdminViewModel = viewModel()
+
                             InventoryScreen(
                                 adminViewModel = adminViewModel
                             )

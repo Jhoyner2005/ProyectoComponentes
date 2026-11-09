@@ -51,14 +51,14 @@ fun UserHomeScreen(
             TextButton(onClick = onLogout) {
                 Icon(
                     imageVector = Icons.Default.ExitToApp,
-                    contentDescription = "Cerrar sesión",
+                    contentDescription = "Sign out",
                     tint = GymudYellow
                 )
 
                 Spacer(modifier = Modifier.width(5.dp))
 
                 Text(
-                    text = "Salir",
+                    text = "Go out",
                     color = GymudYellow
                 )
             }
@@ -68,7 +68,7 @@ fun UserHomeScreen(
 
         // Welcome message
         Text(
-            text = "¡Hola, ${userName}!",
+            text = "¡Hello, ${userName}!",
             color = Color.White,
             fontSize = 27.sp,
             fontWeight = FontWeight.Bold
@@ -77,7 +77,7 @@ fun UserHomeScreen(
         Spacer(modifier = Modifier.height(5.dp))
 
         Text(
-            text = "Bienvenido de nuevo a tu espacio de entrenamiento.",
+            text = "Welcome back to your training space.",
             color = Color.Gray,
             fontSize = 14.sp
         )
@@ -86,7 +86,7 @@ fun UserHomeScreen(
 
         // Training information
         Text(
-            text = "Mi entrenamiento",
+            text = "My training",
             color = Color.White,
             fontSize = 19.sp,
             fontWeight = FontWeight.Bold
@@ -111,13 +111,13 @@ fun UserHomeScreen(
 
                 Column {
                     Text(
-                        text = "Próxima rutina",
+                        text = "Next routine",
                         color = Color.Gray,
                         fontSize = 13.sp
                     )
 
                     Text(
-                        text = "Pendiente de asignación",
+                        text = "Pending assignment",
                         color = Color.White,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
@@ -128,7 +128,7 @@ fun UserHomeScreen(
             Spacer(modifier = Modifier.height(15.dp))
 
             Text(
-                text = "Consulta tus rutinas y registra tus avances para llevar un control de tu actividad física.",
+                text = "Check your routines and record your progress to keep track of your physical activity.",
                 color = Color.LightGray,
                 fontSize = 13.sp
             )
@@ -138,7 +138,7 @@ fun UserHomeScreen(
 
         // Main menu
         Text(
-            text = "Mis opciones",
+            text = "My options",
             color = Color.White,
             fontSize = 19.sp,
             fontWeight = FontWeight.Bold
@@ -151,14 +151,14 @@ fun UserHomeScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             HomeOption(
-                title = "Rutinas",
+                title = "Routines",
                 icon = Icons.Default.FitnessCenter,
                 onClick = onNavigateToRoutine,
                 modifier = Modifier.weight(1f)
             )
 
             HomeOption(
-                title = "Progreso",
+                title = "Progress",
                 icon = Icons.Default.TrendingUp,
                 onClick = onNavigateToProgress,
                 modifier = Modifier.weight(1f)
@@ -172,14 +172,14 @@ fun UserHomeScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             HomeOption(
-                title = "Membresía",
+                title = "Membership",
                 icon = Icons.Default.CreditCard,
                 onClick = onNavigateToMembership,
                 modifier = Modifier.weight(1f)
             )
 
             HomeOption(
-                title = "Entrenador",
+                title = "Coach",
                 icon = Icons.Default.Chat,
                 onClick = onNavigateToChat,
                 modifier = Modifier.weight(1f)
@@ -189,7 +189,7 @@ fun UserHomeScreen(
         Spacer(modifier = Modifier.height(25.dp))
 
         Text(
-            text = "¡Cada entrenamiento cuenta!",
+            text = "Every workout counts!",
             color = GymudYellow,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,

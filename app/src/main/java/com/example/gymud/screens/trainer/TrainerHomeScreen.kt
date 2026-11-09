@@ -23,9 +23,9 @@ fun TrainerHomeScreen(
     onNavigateToChat: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().background(GymudDark).padding(20.dp).verticalScroll(rememberScrollState())) {
-        ScreenTitle("HOLA,\n${trainerName.uppercase()}!", "Panel de Entrenador")
+        ScreenTitle("HOLA,\n${trainerName.uppercase()}!", "Coach Panel")
 
-        Text("Gestión de Clientes", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(bottom = 12.dp))
+        Text("Customer Management", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(bottom = 12.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             Button(
@@ -48,7 +48,7 @@ fun TrainerHomeScreen(
                 Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
                     Icon(Icons.Default.Chat, contentDescription = null, tint = GymudYellow)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Mensajes\nClientes", color = Color.White, fontSize = 12.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    Text("Messages\nCustomers", color = Color.White, fontSize = 12.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 }
             }
         }

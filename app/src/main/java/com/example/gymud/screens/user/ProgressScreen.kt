@@ -29,11 +29,11 @@ import com.example.gymud.viewmodel.ProgressViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-private const val DEMO_USER_ID = "demo_user"
-
 @Composable
-fun ProgressScreen(progressViewModel: ProgressViewModel) {
-
+fun ProgressScreen(
+    userId: String,
+    progressViewModel: ProgressViewModel
+) {
     val measurements by progressViewModel.measurements.collectAsState()
     val message by progressViewModel.message.collectAsState()
     val isLoading by progressViewModel.isLoading.collectAsState()
@@ -46,8 +46,10 @@ fun ProgressScreen(progressViewModel: ProgressViewModel) {
     var bodyFatInput by remember { mutableStateOf("") }
     var showAddForm by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        progressViewModel.loadUserMeasurements(DEMO_USER_ID)
+    LaunchedEffect(userId) {
+        if (userId.isNotBlank()) {
+            progressViewModel.loadUserMeasurements(userId)
+        }
     }
 
     LaunchedEffect(message) {
@@ -55,7 +57,9 @@ fun ProgressScreen(progressViewModel: ProgressViewModel) {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             progressViewModel.clearMessage()
 
-            if (it.contains("éxito")) {
+            if (it.contains("success", ignoreCase = true) ||
+                it.contains("éxito", ignoreCase = true)
+            ) {
                 showAddForm = false
                 weightInput = ""
                 heightInput = ""
@@ -75,13 +79,11 @@ fun ProgressScreen(progressViewModel: ProgressViewModel) {
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-
         ScreenTitle(
-            title = "Progreso Corporal",
-            subtitle = "Tus métricas físicas y evolución"
+            title = "Physical Progress",
+            subtitle = "Your physical measurements and progress"
         )
 
-        // Button to show the measurement form
         Button(
             onClick = { showAddForm = !showAddForm },
             modifier = Modifier
@@ -95,21 +97,19 @@ fun ProgressScreen(progressViewModel: ProgressViewModel) {
         ) {
             Text(
                 text = if (showAddForm) {
-                    "CANCELAR REGISTRO"
+                    "CANCEL"
                 } else {
-                    "+ REGISTRAR NUEVAS MEDIDAS"
+                    "+ ADD NEW MEASUREMENT"
                 },
                 fontWeight = FontWeight.Bold
             )
         }
 
-        // Measurement registration form
         if (showAddForm) {
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-
                     Text(
-                        text = "Nueva medición física",
+                        text = "New Physical Measurement",
                         color = Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
@@ -118,38 +118,38 @@ fun ProgressScreen(progressViewModel: ProgressViewModel) {
                     MeasurementInput(
                         value = weightInput,
                         onValueChange = { weightInput = it },
-                        label = "Peso (kg)"
+                        label = "Weight (kg)"
                     )
 
                     MeasurementInput(
                         value = heightInput,
                         onValueChange = { heightInput = it },
-                        label = "Estatura (cm)"
+                        label = "Height (cm)"
                     )
 
                     MeasurementInput(
                         value = muscleMassInput,
                         onValueChange = { muscleMassInput = it },
-                        label = "Masa muscular (kg)"
+                        label = "Muscle Mass (kg)"
                     )
 
                     MeasurementInput(
                         value = bodyFatInput,
                         onValueChange = { bodyFatInput = it },
-                        label = "Grasa corporal (%)"
+                        label = "Body Fat (%)"
                     )
 
                     Button(
                         onClick = {
                             progressViewModel.saveMeasurement(
-                                userId = DEMO_USER_ID,
+                                userId = userId,
                                 weightStr = weightInput,
                                 heightStr = heightInput,
                                 muscleMassStr = muscleMassInput,
                                 bodyFatStr = bodyFatInput
                             )
                         },
-                        enabled = !isLoading,
+                        enabled = !isLoading && userId.isNotBlank(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
@@ -166,7 +166,7 @@ fun ProgressScreen(progressViewModel: ProgressViewModel) {
                             )
                         } else {
                             Text(
-                                text = "GUARDAR MEDICIÓN",
+                                text = "SAVE MEASUREMENT",
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -175,23 +175,20 @@ fun ProgressScreen(progressViewModel: ProgressViewModel) {
             }
         }
 
-        // Latest physical measurements
         Text(
-            text = "Resumen de tu estado físico",
+            text = "Physical Summary",
             color = Color.White,
             fontSize = 19.sp,
             fontWeight = FontWeight.Bold
         )
 
         if (latestMeasurement != null) {
-
             val bmiCategory = getBmiCategory(latestMeasurement.bmi)
 
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-
                     Text(
-                        text = "Índice de Masa Corporal",
+                        text = "Body Mass Index",
                         color = Color.Gray,
                         fontSize = 13.sp
                     )
@@ -224,22 +221,21 @@ fun ProgressScreen(progressViewModel: ProgressViewModel) {
                     HorizontalDivider(color = Color.Gray.copy(alpha = 0.3f))
 
                     MetricRow(
-                        label = "Índice de masa muscular",
+                        label = "Muscle Mass Index",
                         value = "${latestMeasurement.imm} %"
                     )
                 }
             }
 
-            // Basic physical metrics
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 MetricCard(
-                    title = "Peso",
+                    title = "Weight",
                     value = "${latestMeasurement.weight} kg",
                     modifier = Modifier.weight(1f)
                 )
 
                 MetricCard(
-                    title = "Masa muscular",
+                    title = "Muscle Mass",
                     value = "${latestMeasurement.muscleMass} kg",
                     modifier = Modifier.weight(1f)
                 )
@@ -247,55 +243,51 @@ fun ProgressScreen(progressViewModel: ProgressViewModel) {
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 MetricCard(
-                    title = "Grasa corporal",
+                    title = "Body Fat",
                     value = "${latestMeasurement.bodyFat} %",
                     modifier = Modifier.weight(1f)
                 )
 
                 MetricCard(
-                    title = "Estatura",
+                    title = "Height",
                     value = "${latestMeasurement.height} cm",
                     modifier = Modifier.weight(1f)
                 )
             }
-
         } else {
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Todavía no tienes mediciones registradas.",
+                    text = "You do not have any registered measurements yet.",
                     color = Color.Gray
                 )
             }
         }
 
-        // Weight evolution chart
         Text(
-            text = "Evolución física",
+            text = "Physical Evolution",
             color = Color.White,
             fontSize = 19.sp,
             fontWeight = FontWeight.Bold
         )
 
         ProgressChart(
-            title = "Evolución del peso",
+            title = "Weight Evolution",
             measurements = measurements,
             valueSelector = { it.weight },
             unit = "kg",
             lineColor = GymudYellow
         )
 
-        // Muscle mass evolution chart
         ProgressChart(
-            title = "Evolución de masa muscular",
+            title = "Muscle Mass Evolution",
             measurements = measurements,
             valueSelector = { it.muscleMass },
             unit = "kg",
             lineColor = Color(0xFF4FC3F7)
         )
 
-        // Measurement history
         Text(
-            text = "Historial de mediciones",
+            text = "Measurement History",
             color = Color.White,
             fontSize = 19.sp,
             fontWeight = FontWeight.Bold
@@ -304,7 +296,7 @@ fun ProgressScreen(progressViewModel: ProgressViewModel) {
         if (measurements.isEmpty()) {
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "No hay registros disponibles.",
+                    text = "No records available.",
                     color = Color.Gray
                 )
             }
@@ -316,7 +308,6 @@ fun ProgressScreen(progressViewModel: ProgressViewModel) {
     }
 }
 
-// Reusable input for physical measurements
 @Composable
 private fun MeasurementInput(
     value: String,
@@ -345,7 +336,6 @@ private fun MeasurementInput(
     )
 }
 
-// Reusable card for a physical metric
 @Composable
 private fun MetricCard(
     title: String,
@@ -372,7 +362,6 @@ private fun MetricCard(
     }
 }
 
-// Display a label and its measurement
 @Composable
 private fun MetricRow(
     label: String,
@@ -396,7 +385,6 @@ private fun MetricRow(
     }
 }
 
-// Chart to display physical progress
 @Composable
 private fun ProgressChart(
     title: String,
@@ -410,7 +398,6 @@ private fun ProgressChart(
 
     GlassCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-
             Text(
                 text = title,
                 color = Color.White,
@@ -420,17 +407,16 @@ private fun ProgressChart(
 
             if (values.isEmpty()) {
                 Text(
-                    text = "No hay datos suficientes para mostrar la gráfica.",
+                    text = "There is not enough data to display the chart.",
                     color = Color.Gray,
                     fontSize = 13.sp
                 )
             } else {
-
                 val minimum = values.minOrNull() ?: 0.0
                 val maximum = values.maxOrNull() ?: 0.0
 
                 Text(
-                    text = "Último registro: ${values.last()} $unit",
+                    text = "Latest record: ${values.last()} $unit",
                     color = lineColor,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
@@ -451,7 +437,6 @@ private fun ProgressChart(
                         maximum - minimum
                     }
 
-                    // Draw horizontal guide lines
                     for (index in 0..3) {
                         val y = verticalPadding +
                                 (chartHeight - verticalPadding * 2) * index / 3
@@ -464,59 +449,52 @@ private fun ProgressChart(
                         )
                     }
 
-                    if (values.isNotEmpty()) {
+                    val points = values.mapIndexed { index, value ->
+                        val x = if (values.size == 1) {
+                            chartWidth / 2
+                        } else {
+                            chartWidth * index / (values.size - 1)
+                        }
 
-                        val points = values.mapIndexed { index, value ->
+                        val normalizedValue = (value - minimum) / range
 
-                            val x = if (values.size == 1) {
-                                chartWidth / 2
-                            } else {
-                                chartWidth * index / (values.size - 1)
+                        val y = chartHeight - verticalPadding -
+                                (normalizedValue * (chartHeight - verticalPadding * 2)).toFloat()
+
+                        Offset(x, y)
+                    }
+
+                    if (points.size > 1) {
+                        val path = Path().apply {
+                            moveTo(points.first().x, points.first().y)
+
+                            points.drop(1).forEach { point ->
+                                lineTo(point.x, point.y)
                             }
-
-                            val normalizedValue =
-                                (value - minimum) / range
-
-                            val y = chartHeight - verticalPadding -
-                                    (normalizedValue * (chartHeight - verticalPadding * 2)).toFloat()
-
-                            Offset(x, y)
                         }
 
-                        // Connect measurement points
-                        if (points.size > 1) {
-                            val path = Path().apply {
-                                moveTo(points.first().x, points.first().y)
-
-                                points.drop(1).forEach { point ->
-                                    lineTo(point.x, point.y)
-                                }
-                            }
-
-                            drawPath(
-                                path = path,
-                                color = lineColor,
-                                style = Stroke(
-                                    width = 3.dp.toPx(),
-                                    cap = StrokeCap.Round
-                                )
+                        drawPath(
+                            path = path,
+                            color = lineColor,
+                            style = Stroke(
+                                width = 3.dp.toPx(),
+                                cap = StrokeCap.Round
                             )
-                        }
+                        )
+                    }
 
-                        // Draw measurement points
-                        points.forEach { point ->
-                            drawCircle(
-                                color = lineColor,
-                                radius = 5.dp.toPx(),
-                                center = point
-                            )
+                    points.forEach { point ->
+                        drawCircle(
+                            color = lineColor,
+                            radius = 5.dp.toPx(),
+                            center = point
+                        )
 
-                            drawCircle(
-                                color = Color.White,
-                                radius = 2.dp.toPx(),
-                                center = point
-                            )
-                        }
+                        drawCircle(
+                            color = Color.White,
+                            radius = 2.dp.toPx(),
+                            center = point
+                        )
                     }
                 }
 
@@ -525,13 +503,13 @@ private fun ProgressChart(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Más antiguo",
+                        text = "Oldest",
                         color = Color.Gray,
                         fontSize = 11.sp
                     )
 
                     Text(
-                        text = "Más reciente",
+                        text = "Newest",
                         color = Color.Gray,
                         fontSize = 11.sp
                     )
@@ -541,10 +519,8 @@ private fun ProgressChart(
     }
 }
 
-// Display one historical measurement
 @Composable
 fun MeasurementHistoryCard(item: Measurement) {
-
     val dateFormat = SimpleDateFormat(
         "dd/MM/yyyy HH:mm",
         Locale.getDefault()
@@ -554,7 +530,6 @@ fun MeasurementHistoryCard(item: Measurement) {
 
     GlassCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -567,7 +542,7 @@ fun MeasurementHistoryCard(item: Measurement) {
                 )
 
                 Text(
-                    text = "IMC: ${item.bmi}",
+                    text = "BMI: ${item.bmi}",
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
@@ -576,34 +551,33 @@ fun MeasurementHistoryCard(item: Measurement) {
             HorizontalDivider(color = Color.Gray.copy(alpha = 0.3f))
 
             MetricRow(
-                label = "Peso corporal",
+                label = "Body Weight",
                 value = "${item.weight} kg"
             )
 
             MetricRow(
-                label = "Masa muscular",
+                label = "Muscle Mass",
                 value = "${item.muscleMass} kg"
             )
 
             MetricRow(
-                label = "Grasa corporal",
+                label = "Body Fat",
                 value = "${item.bodyFat} %"
             )
 
             MetricRow(
-                label = "Estatura",
+                label = "Height",
                 value = "${item.height} cm"
             )
         }
     }
 }
 
-// Classify the body mass index
 private fun getBmiCategory(bmi: Double): Pair<String, Color> {
     return when {
-        bmi < 18.5 -> Pair("Bajo peso", Color(0xFF29B6F6))
-        bmi < 25.0 -> Pair("Peso normal", Color(0xFF66BB6A))
-        bmi < 30.0 -> Pair("Sobrepeso", Color(0xFFFFA726))
-        else -> Pair("Obesidad", Color(0xFFEF5350))
+        bmi < 18.5 -> Pair("Underweight", Color(0xFF29B6F6))
+        bmi < 25.0 -> Pair("Normal Weight", Color(0xFF66BB6A))
+        bmi < 30.0 -> Pair("Overweight", Color(0xFFFFA726))
+        else -> Pair("Obesity", Color(0xFFEF5350))
     }
 }
