@@ -1,3 +1,4 @@
+
 package com.example.gymud.screens.user
 
 import androidx.compose.foundation.background
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,48 +24,215 @@ fun UserHomeScreen(
     onNavigateToRoutine: () -> Unit,
     onNavigateToProgress: () -> Unit,
     onNavigateToMembership: () -> Unit,
-    onNavigateToChat: () -> Unit
+    onNavigateToChat: () -> Unit,
+    onLogout: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize().background(GymudDark).padding(20.dp).verticalScroll(rememberScrollState())) {
-        ScreenTitle("BIENVENIDO,\n${userName.uppercase()}!", "Aquí está tu resumen de hoy")
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(GymudDark)
+            .verticalScroll(rememberScrollState())
+            .padding(20.dp)
+    ) {
 
-        GlassCard(modifier = Modifier.fillMaxWidth()) {
-            Text("Snapshot de Fitness", color = GymudYellow, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
-            Text("Próximo Entrenamiento: Por asignar", color = Color.White)
-            Text("Porcentaje de Grasa: Sin registrar", color = Color.White)
-            Spacer(modifier = Modifier.height(8.dp))
-            LinearProgressIndicator(progress = 0f, color = GymudYellow, trackColor = Color.DarkGray, modifier = Modifier.fillMaxWidth())
+        // App name and logout button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "GYMUD",
+                color = GymudYellow,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            TextButton(onClick = onLogout) {
+                Icon(
+                    imageVector = Icons.Default.ExitToApp,
+                    contentDescription = "Cerrar sesión",
+                    tint = GymudYellow
+                )
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                Text(
+                    text = "Salir",
+                    color = GymudYellow
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-        Text("Accesos Rápidos", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(bottom = 8.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
-        // Primera fila de botones
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            Button(onClick = onNavigateToRoutine, colors = ButtonDefaults.buttonColors(containerColor = GymudSurface), modifier = Modifier.weight(1f)) {
-                Icon(Icons.Default.FitnessCenter, contentDescription = null, tint = GymudYellow)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Rutina", color = Color.White)
+        // Welcome message
+        Text(
+            text = "¡Hola, ${userName}!",
+            color = Color.White,
+            fontSize = 27.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        Text(
+            text = "Bienvenido de nuevo a tu espacio de entrenamiento.",
+            color = Color.Gray,
+            fontSize = 14.sp
+        )
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // Training information
+        Text(
+            text = "Mi entrenamiento",
+            color = Color.White,
+            fontSize = 19.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        GlassCard(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FitnessCenter,
+                    contentDescription = null,
+                    tint = GymudYellow,
+                    modifier = Modifier.size(35.dp)
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = "Próxima rutina",
+                        color = Color.Gray,
+                        fontSize = 13.sp
+                    )
+
+                    Text(
+                        text = "Pendiente de asignación",
+                        color = Color.White,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
-            Button(onClick = onNavigateToProgress, colors = ButtonDefaults.buttonColors(containerColor = GymudSurface), modifier = Modifier.weight(1f)) {
-                Icon(Icons.Default.TrendingUp, contentDescription = null, tint = GymudYellow)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Progreso", color = Color.White)
-            }
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Text(
+                text = "Consulta tus rutinas y registra tus avances para llevar un control de tu actividad física.",
+                color = Color.LightGray,
+                fontSize = 13.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // Main menu
+        Text(
+            text = "Mis opciones",
+            color = Color.White,
+            fontSize = 19.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            HomeOption(
+                title = "Rutinas",
+                icon = Icons.Default.FitnessCenter,
+                onClick = onNavigateToRoutine,
+                modifier = Modifier.weight(1f)
+            )
+
+            HomeOption(
+                title = "Progreso",
+                icon = Icons.Default.TrendingUp,
+                onClick = onNavigateToProgress,
+                modifier = Modifier.weight(1f)
+            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            Button(onClick = onNavigateToMembership, colors = ButtonDefaults.buttonColors(containerColor = GymudSurface), modifier = Modifier.weight(1f)) {
-                Icon(Icons.Default.CreditCard, contentDescription = null, tint = GymudYellow)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Plan", color = Color.White)
-            }
-            Button(onClick = onNavigateToChat, colors = ButtonDefaults.buttonColors(containerColor = GymudSurface), modifier = Modifier.weight(1f)) {
-                Icon(Icons.Default.Chat, contentDescription = null, tint = GymudYellow)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Entrenador", color = Color.White)
-            }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            HomeOption(
+                title = "Membresía",
+                icon = Icons.Default.CreditCard,
+                onClick = onNavigateToMembership,
+                modifier = Modifier.weight(1f)
+            )
+
+            HomeOption(
+                title = "Entrenador",
+                icon = Icons.Default.Chat,
+                onClick = onNavigateToChat,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(25.dp))
+
+        Text(
+            text = "¡Cada entrenamiento cuenta!",
+            color = GymudYellow,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+    }
+}
+
+@Composable
+fun HomeOption(
+    title: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.height(100.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = GymudSurface
+        ),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = GymudYellow,
+                modifier = Modifier.size(27.dp)
+            )
+
+            Spacer(modifier = Modifier.height(7.dp))
+
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = 13.sp
+            )
         }
     }
 }

@@ -1,3 +1,4 @@
+
 package com.example.gymud.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,7 @@ sealed class AuthState {
 }
 
 class AuthViewModel : ViewModel() {
+
     private val repository = AuthRepository()
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
@@ -31,8 +33,14 @@ class AuthViewModel : ViewModel() {
 
         viewModelScope.launch {
             repository.login(email, password).fold(
-                onSuccess = { uid -> _authState.value = AuthState.Success(uid) },
-                onFailure = { error -> _authState.value = AuthState.Error(error.localizedMessage ?: "Error de autenticación") }
+                onSuccess = { uid ->
+                    _authState.value = AuthState.Success(uid)
+                },
+                onFailure = { error ->
+                    _authState.value = AuthState.Error(
+                        error.localizedMessage ?: "Error de autenticación"
+                    )
+                }
             )
         }
     }
@@ -47,8 +55,14 @@ class AuthViewModel : ViewModel() {
 
         viewModelScope.launch {
             repository.register(name, email, password).fold(
-                onSuccess = { uid -> _authState.value = AuthState.Success(uid) },
-                onFailure = { error -> _authState.value = AuthState.Error(error.localizedMessage ?: "Error al registrar la cuenta") }
+                onSuccess = { uid ->
+                    _authState.value = AuthState.Success(uid)
+                },
+                onFailure = { error ->
+                    _authState.value = AuthState.Error(
+                        error.localizedMessage ?: "Error al registrar la cuenta"
+                    )
+                }
             )
         }
     }
@@ -63,10 +77,22 @@ class AuthViewModel : ViewModel() {
 
         viewModelScope.launch {
             repository.resetPassword(email).fold(
-                onSuccess = { _authState.value = AuthState.PasswordResetSent },
-                onFailure = { error -> _authState.value = AuthState.Error(error.localizedMessage ?: "Error al enviar correo de recuperación") }
+                onSuccess = {
+                    _authState.value = AuthState.PasswordResetSent
+                },
+                onFailure = { error ->
+                    _authState.value = AuthState.Error(
+                        error.localizedMessage ?: "Error al enviar correo de recuperación"
+                    )
+                }
             )
         }
+    }
+
+    // Close the current session
+    fun logout() {
+        repository.logout()
+        _authState.value = AuthState.Idle
     }
 
     fun resetState() {

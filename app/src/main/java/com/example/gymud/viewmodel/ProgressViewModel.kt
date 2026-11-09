@@ -1,28 +1,18 @@
+
 package com.example.gymud.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.gymud.data.model.Measurement
-import com.example.gymud.data.repository.ProgressRepository
 import com.google.firebase.Timestamp
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import java.util.Date
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class ProgressViewModel : ViewModel() {
-    private val repository = ProgressRepository()
 
-    private val _currentUserId = MutableStateFlow("")
-
-    val measurements: StateFlow<List<Measurement>> = _currentUserId.flatMapLatest { uid ->
-        repository.getMeasurementsStream(uid)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    private val _measurements = MutableStateFlow(createSampleMeasurements())
+    val measurements: StateFlow<List<Measurement>> = _measurements
 
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
@@ -30,10 +20,14 @@ class ProgressViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    // Load local measurements
     fun loadUserMeasurements(userId: String) {
-        _currentUserId.value = userId
+        _measurements.value = _measurements.value.map {
+            it.copy(userId = userId)
+        }
     }
 
+    // Save a new physical measurement
     fun saveMeasurement(
         userId: String,
         weightStr: String,
@@ -41,24 +35,37 @@ class ProgressViewModel : ViewModel() {
         muscleMassStr: String,
         bodyFatStr: String
     ) {
-        val weight = weightStr.toDoubleOrNull()
-        val heightCm = heightStr.toDoubleOrNull()
-        val muscleMass = muscleMassStr.toDoubleOrNull()
-        val bodyFat = bodyFatStr.toDoubleOrNull()
+        val weight = weightStr.replace(",", ".").toDoubleOrNull()
+        val heightCm = heightStr.replace(",", ".").toDoubleOrNull()
+        val muscleMass = muscleMassStr.replace(",", ".").toDoubleOrNull()
+        val bodyFat = bodyFatStr.replace(",", ".").toDoubleOrNull()
 
-        if (weight == null || heightCm == null || muscleMass == null || bodyFat == null || weight <= 0 || heightCm <= 0) {
+        if (weight == null || heightCm == null ||
+            muscleMass == null || bodyFat == null
+        ) {
             _message.value = "Por favor ingresa valores numéricos válidos"
             return
         }
 
+        if (weight <= 0 || heightCm <= 0 ||
+            muscleMass < 0 || bodyFat !in 0.0..100.0
+        ) {
+            _message.value = "Verifica que los valores ingresados sean válidos"
+            return
+        }
+
+        if (muscleMass > weight) {
+            _message.value = "La masa muscular no puede superar el peso total"
+            return
+        }
+
         val heightM = heightCm / 100.0
-        val rawBmi = weight / (heightM * heightM)
-        val bmi = (rawBmi * 10.0).roundToInt() / 10.0 // Redondear a 1 decimal
+        val bmi = ((weight / (heightM * heightM)) * 10).roundToInt() / 10.0
+        val imm = ((muscleMass / weight) * 1000).roundToInt() / 10.0
 
-        val rawImm = if (weight > 0) (muscleMass / weight) * 100.0 else 0.0
-        val imm = (rawImm * 10.0).roundToInt() / 10.0
-
-        val measurement = Measurement(
+        val newMeasurement = Measurement(
+            id = System.currentTimeMillis().toString(),
+            userId = userId,
             date = Timestamp.now(),
             weight = weight,
             height = heightCm,
@@ -70,21 +77,73 @@ class ProgressViewModel : ViewModel() {
 
         _isLoading.value = true
 
-        viewModelScope.launch {
-            repository.addMeasurement(userId, measurement).fold(
-                onSuccess = {
-                    _isLoading.value = false
-                    _message.value = "¡Registro de progreso guardado con éxito!"
-                },
-                onFailure = { error ->
-                    _isLoading.value = false
-                    _message.value = "Error al guardar: ${error.localizedMessage}"
-                }
+        _measurements.value = listOf(newMeasurement) + _measurements.value
+        _message.value = "¡Registro de progreso guardado con éxito!"
+        _isLoading.value = false
+    }
+
+    // Clear the current message
+    fun clearMessage() {
+        _message.value = null
+    }
+
+    // Create sample measurements for the screen
+    private fun createSampleMeasurements(): List<Measurement> {
+        val currentDate = System.currentTimeMillis()
+
+        return listOf(
+            createMeasurement(
+                id = "sample_1",
+                daysAgo = 0,
+                weight = 71.2,
+                muscleMass = 30.0,
+                bodyFat = 19.5
+            ),
+            createMeasurement(
+                id = "sample_2",
+                daysAgo = 15,
+                weight = 71.8,
+                muscleMass = 29.5,
+                bodyFat = 20.0
+            ),
+            createMeasurement(
+                id = "sample_3",
+                daysAgo = 30,
+                weight = 72.5,
+                muscleMass = 29.0,
+                bodyFat = 21.0
+            )
+        ).map {
+            it.copy(
+                date = Timestamp(
+                    Date(currentDate - (it.date.seconds * 1000))
+                )
             )
         }
     }
 
-    fun clearMessage() {
-        _message.value = null
+    private fun createMeasurement(
+        id: String,
+        daysAgo: Int,
+        weight: Double,
+        muscleMass: Double,
+        bodyFat: Double
+    ): Measurement {
+        val height = 175.0
+        val heightM = height / 100.0
+        val bmi = ((weight / (heightM * heightM)) * 10).roundToInt() / 10.0
+        val imm = ((muscleMass / weight) * 1000).roundToInt() / 10.0
+
+        return Measurement(
+            id = id,
+            userId = "demo_user",
+            date = Timestamp(Date(daysAgo * 24L * 60 * 60 * 1000)),
+            weight = weight,
+            height = height,
+            muscleMass = muscleMass,
+            bodyFat = bodyFat,
+            bmi = bmi,
+            imm = imm
+        )
     }
 }
