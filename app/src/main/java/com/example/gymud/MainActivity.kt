@@ -238,6 +238,17 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onNavigateToChat = {
                                     navController.navigate("chat_screen")
+                                },
+                                onLogout = {
+                                    authViewModel.logout()
+                                    currentUserId = ""
+                                    selectedTrainer = null
+                                    navController.navigate("login") {
+                                        popUpTo("login") {
+                                            inclusive = false
+                                        }
+                                        launchSingleTop = true
+                                    }
                                 }
                             )
                         }
@@ -268,6 +279,17 @@ class MainActivity : ComponentActivity() {
                                 onNavigateToInventory = {
                                     navController.navigate("admin_inventory")
                                 },
+                                onLogout = {
+                                    authViewModel.logout()
+                                    currentUserId = ""
+                                    selectedTrainer = null
+                                    navController.navigate("login") {
+                                        popUpTo("login") {
+                                            inclusive = false
+                                        }
+                                        launchSingleTop = true
+                                    }
+                                },
                                 adminViewModel = adminViewModel
                             )
                         }
@@ -276,7 +298,10 @@ class MainActivity : ComponentActivity() {
                             val adminViewModel: AdminViewModel = viewModel()
 
                             UserManagementScreen(
-                                adminViewModel = adminViewModel
+                                adminViewModel = adminViewModel,
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                }
                             )
                         }
 
@@ -284,7 +309,10 @@ class MainActivity : ComponentActivity() {
                             val adminViewModel: AdminViewModel = viewModel()
 
                             InventoryScreen(
-                                adminViewModel = adminViewModel
+                                adminViewModel = adminViewModel,
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                }
                             )
                         }
                     }

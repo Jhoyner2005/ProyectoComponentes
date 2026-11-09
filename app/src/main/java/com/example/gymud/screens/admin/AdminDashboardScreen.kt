@@ -4,8 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -18,6 +21,7 @@ import com.example.gymud.viewmodel.AdminViewModel
 fun AdminDashboardScreen(
     onNavigateToUsers: () -> Unit,
     onNavigateToInventory: () -> Unit,
+    onLogout: () -> Unit,
     adminViewModel: AdminViewModel
 ) {
     val activeUsersCount by adminViewModel.activeUsersCount.collectAsState()
@@ -31,6 +35,34 @@ fun AdminDashboardScreen(
             .padding(20.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        // Header con título app y botón de salir
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "GYMUD",
+                color = GymudYellow,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            TextButton(onClick = onLogout) {
+                Icon(
+                    imageVector = Icons.Default.ExitToApp,
+                    contentDescription = "Cerrar Sesión",
+                    tint = GymudYellow
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(
+                    text = "Salir",
+                    color = GymudYellow,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
         ScreenTitle("Panel de Control", "Vista General del Gimnasio")
 
         // Botones de Navegación del Admin

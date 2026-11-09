@@ -24,8 +24,13 @@ import com.example.gymud.data.model.Inventory
 import com.example.gymud.screens.common.*
 import com.example.gymud.viewmodel.AdminViewModel
 
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 @Composable
-fun InventoryScreen(adminViewModel: AdminViewModel) {
+fun InventoryScreen(
+    adminViewModel: AdminViewModel,
+    onNavigateBack: () -> Unit = {}
+) {
     val inventory by adminViewModel.inventory.collectAsState()
     val message by adminViewModel.message.collectAsState()
     val context = LocalContext.current
@@ -57,7 +62,24 @@ fun InventoryScreen(adminViewModel: AdminViewModel) {
     }
 
     Column(modifier = Modifier.fillMaxSize().background(GymudDark).padding(20.dp)) {
-        ScreenTitle("Gestión de Inventario", "Clasificación y reporte de mantenimiento")
+        // Botón de Atrás y Título
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onNavigateBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Atrás",
+                    tint = GymudYellow
+                )
+            }
+            Spacer(modifier = Modifier.width(4.dp))
+            Column {
+                Text("Gestión de Inventario", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                Text("Clasificación y reporte de mantenimiento", fontSize = 13.sp, color = Color.Gray)
+            }
+        }
 
         // Botón Agregar Nuevo Equipo
         Button(

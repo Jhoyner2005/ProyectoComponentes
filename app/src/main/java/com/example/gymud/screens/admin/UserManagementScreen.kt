@@ -23,8 +23,13 @@ import com.example.gymud.data.model.User
 import com.example.gymud.screens.common.*
 import com.example.gymud.viewmodel.AdminViewModel
 
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 @Composable
-fun UserManagementScreen(adminViewModel: AdminViewModel) {
+fun UserManagementScreen(
+    adminViewModel: AdminViewModel,
+    onNavigateBack: () -> Unit = {}
+) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilterIndex by remember { mutableIntStateOf(0) }
 
@@ -64,7 +69,24 @@ fun UserManagementScreen(adminViewModel: AdminViewModel) {
     }
 
     Column(modifier = Modifier.fillMaxSize().background(GymudDark).padding(20.dp)) {
-        ScreenTitle("Gestión de Miembros", "Administrar roles y estado de membresías")
+        // Botón de Atrás y Título
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onNavigateBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Atrás",
+                    tint = GymudYellow
+                )
+            }
+            Spacer(modifier = Modifier.width(4.dp))
+            Column {
+                Text("Gestión de Miembros", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                Text("Administrar roles y estado de membresías", fontSize = 13.sp, color = Color.Gray)
+            }
+        }
 
         OutlinedTextField(
             value = searchQuery,
