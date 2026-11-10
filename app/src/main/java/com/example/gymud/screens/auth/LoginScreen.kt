@@ -20,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -82,7 +83,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Título de Marca y Eslogan
+
             Text(
                 text = "GYMUD",
                 fontSize = 42.sp,
@@ -98,7 +99,7 @@ fun LoginScreen(
                 modifier = Modifier.padding(top = 4.dp, bottom = 28.dp)
             )
 
-            // Tarjeta de Formulario
+            // formulario
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column {
                     Row(
@@ -113,14 +114,14 @@ fun LoginScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Iniciar Sesión",
+                            text = "Iniciar Sesion",
                             color = Color.White,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    // Mensaje de validación si faltan datos
+                    // validación si faltan datos
                     if (errorMessage.isNotEmpty()) {
                         Surface(
                             color = Color(0xFFD32F2F).copy(alpha = 0.2f),
@@ -139,14 +140,14 @@ fun LoginScreen(
                         }
                     }
 
-                    // Campo Correo Electrónico
+                    // Correo Electronico
                     OutlinedTextField(
                         value = email,
                         onValueChange = {
                             email = it
                             if (errorMessage.isNotEmpty()) errorMessage = ""
                         },
-                        label = { Text("Correo electrónico", color = Color.Gray) },
+                        label = { Text("Correo electronico", color = Color.Gray) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Email,
@@ -170,7 +171,7 @@ fun LoginScreen(
                         )
                     )
 
-                    // Campo Contraseña
+                    // Contraseña
                     OutlinedTextField(
                         value = password,
                         onValueChange = {
@@ -211,7 +212,7 @@ fun LoginScreen(
                         )
                     )
 
-                    // Botón Iniciar Sesión
+                    // Boton Iniciar Sesión
                     Button(
                         onClick = {
                             if (email.isBlank() || password.isBlank()) {
@@ -250,7 +251,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Enlaces adicionales de navegación
+
             TextButton(
                 onClick = onNavigateToForgotPassword,
                 enabled = !isLoading
